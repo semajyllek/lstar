@@ -1,4 +1,4 @@
-from utils import run_dfa
+from src.utils import run_dfa
 import itertools
 
 class EvenAsTeacher:

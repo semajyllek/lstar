@@ -3,8 +3,8 @@ import time
 import itertools
 from typing import Dict, Set
 import pytest
-from opt_lstar_learner import LStarLearner, OptimizedLStarLearner 
-from teachers import EvenAsTeacher
+from src.opt_lstar_learner import LStarLearner, OptimizedLStarLearner 
+from src.teachers import EvenAsTeacher
 
 def generate_large_example():
     """Generate a very large example set that will stress test the consistency check"""

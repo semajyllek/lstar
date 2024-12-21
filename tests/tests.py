@@ -1,8 +1,8 @@
 import pytest
-from utils import run_dfa
+from src.utils import run_dfa
 from itertools import product
-from teachers import EvenAsTeacher, EndsInABTeacher, NoThreeAsTeacher
-from opt_lstar_learner import OptimizedLStarLearner
+from src.teachers import EvenAsTeacher, EndsInABTeacher, NoThreeAsTeacher
+from src.opt_lstar_learner import OptimizedLStarLearner
 
 # Fixtures for our teachers
 @pytest.fixture

@@ -1,4 +1,4 @@
-from lstar_learner import LStarLearner
+from src.lstar_learner import LStarLearner
 from collections import defaultdict
 
 

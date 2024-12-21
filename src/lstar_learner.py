@@ -1,4 +1,4 @@
-from utils import run_dfa
+from src.utils import run_dfa
 
 # Description: Implementation of the L* algorithm for learning DFAs.
 class LStarLearner:
