@@ -1,4 +1,4 @@
-import learningSteps from 'steps.js';
+import React from 'react';
 
 
 
