@@ -1,4 +1,4 @@
-import learningSteps from './learning-steps.js';
+import learningSteps from 'steps.js';
 
 
 

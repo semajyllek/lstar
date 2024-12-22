@@ -1,5 +1,5 @@
 // Example learning steps for "even number of a's" language
-const learning_steps = [
+const learningSteps = [
 	{
         step: "Initial State",
         description: "Start with empty sets S and E, then make initial membership queries.",
@@ -98,4 +98,4 @@ const learning_steps = [
     }
 ];
 
-export default learning_steps;
+export default learningSteps;
