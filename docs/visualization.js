@@ -1,12 +1,36 @@
 const { useState, useEffect } = React;
 
 
+const Tooltip = ({ children, content }) => {
+    const [show, setShow] = useState(false);
+    return (
+        <div className="relative inline-block">
+            <div 
+                onMouseEnter={() => setShow(true)}
+                onMouseLeave={() => setShow(false)}
+                className="underline cursor-help"
+            >
+                {children}
+            </div>
+            {show && (
+                <div className="absolute z-10 w-64 px-3 py-2 text-sm font-normal text-left text-gray-700 bg-white border rounded-lg shadow-lg bottom-full left-1/2 transform -translate-x-1/2 mb-2">
+                    {content}
+                </div>
+            )}
+        </div>
+    );
+};
 
 // Example learning steps for "even number of a's" language
 const steps = [
-    {
+	{
         step: "Initial State",
-        description: "Start with empty string in S and E. Fill initial observation table.",
+        description: "Start with empty sets S and E, then make initial membership queries.",
+        membershipQueries: [
+            { input: "", result: true, explanation: "Empty string has 0 a's (even)" },
+            { input: "a", result: false, explanation: "Single 'a' (odd)" },
+            { input: "b", result: true, explanation: "No a's (even)" }
+        ],
         S: [''],
         E: [''],
         table: {
@@ -54,6 +78,34 @@ const steps = [
             'b': { '': true },
             'aa': { '': true },
             'ab': { '': false }
+        },
+        dfa: {
+            states: 2,
+            initial: 0,
+            accepting: [0],
+            transitions: {
+                '0,a': 1,
+                '0,b': 0,
+                '1,a': 0,
+                '1,b': 1
+            }
+        }
+    },
+	{
+        step: "Testing Hypothesis DFA",
+        description: "Testing our DFA with string 'aba'. The teacher provides this as a counterexample.",
+        membershipQueries: [
+            { input: "aba", result: false, explanation: "Has odd number of a's but DFA accepts it" }
+        ],
+        counterexample: "aba",
+        S: ['', 'a'],
+        E: ['a'],  // Added 'a' as distinguishing suffix
+        table: {
+            '': { '': true, 'a': false },
+            'a': { '': false, 'a': true },
+            'b': { '': true, 'a': false },
+            'aa': { '': true, 'a': false },
+            'ab': { '': false, 'a': false }
         },
         dfa: {
             states: 2,
