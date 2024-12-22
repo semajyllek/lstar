@@ -1,10 +1,4 @@
 const { useState, useEffect } = React;
-import { learningSteps } from './steps.js';
-import { ObservationTable } from './components/ObservationTable.js';
-import { DFAVisualization } from './components/DFAVisualization.js';
-import { TableExplanation } from './components/TableExplanation.js';
-
-
 
 const LStarVisualization = () => {
     const [step, setStep] = useState(0);
