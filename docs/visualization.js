@@ -1,4 +1,9 @@
+import learningSteps from './learning-steps.js';
+
+
+
 const { useState, useEffect } = React;
+
 
 const LStarVisualization = () => {
     const [step, setStep] = useState(0);
