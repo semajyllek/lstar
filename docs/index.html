@@ -1,21 +1,151 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L* Algorithm Visualization</title>
-    <!-- Load React -->
-    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .observation-table {
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        .observation-table th, .observation-table td {
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            text-align: center;
+        }
+        .observation-table th {
+            background-color: #f5f5f5;
+        }
+        .step {
+            margin: 30px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .highlight {
+            background-color: #fff3cd;
+        }
+        .automaton {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .note {
+            color: #666;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
-    <!-- Load our scripts in correct order -->
-    <script type="text/babel" src="steps.js"></script>
-    <script type="text/babel" src="components/ObservationTable.js"></script>
-    <script type="text/babel" src="components/DFAVisualization.js"></script>
-    <script type="text/babel" src="visualization.js"></script>
+    <h1>L* Algorithm Visualization Example</h1>
+    <p>Target Language: Strings over {a, b} containing an even number of a's</p>
+    
+    <div class="step">
+        <h3>Step 1: Initial Observation Table</h3>
+        <p>Starting with empty string (ε) in S, and single letter suffixes in E</p>
+        <table class="observation-table">
+            <tr>
+                <th></th>
+                <th>ε</th>
+                <th>a</th>
+            </tr>
+            <tr>
+                <th>S: ε</th>
+                <td>1</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>S·A: a</th>
+                <td>0</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th>S·A: b</th>
+                <td>1</td>
+                <td>0</td>
+            </tr>
+        </table>
+        <p class="note">1 = accept, 0 = reject</p>
+    </div>
+
+    <div class="step">
+        <h3>Step 2: Observation Table After Adding 'aa'</h3>
+        <p>Table is not closed because row(a) is not in S. Adding 'aa' to S.</p>
+        <table class="observation-table">
+            <tr>
+                <th></th>
+                <th>ε</th>
+                <th>a</th>
+            </tr>
+            <tr>
+                <th>S: ε</th>
+                <td>1</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>S: aa</th>
+                <td>1</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>S·A: a</th>
+                <td>0</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th>S·A: b</th>
+                <td>1</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>S·A: aaa</th>
+                <td>0</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th>S·A: aab</th>
+                <td>1</td>
+                <td>0</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="step">
+        <h3>Step 3: First Conjecture DFA</h3>
+        <div class="automaton">
+            <p>States:</p>
+            <ul>
+                <li>q0 = [row(ε)] - Initial and accepting state</li>
+                <li>q1 = [row(a)] - Non-accepting state</li>
+            </ul>
+            <p>Transitions:</p>
+            <ul>
+                <li>q0 --a--> q1</li>
+                <li>q0 --b--> q0</li>
+                <li>q1 --a--> q0</li>
+                <li>q1 --b--> q1</li>
+            </ul>
+        </div>
+        <p>This DFA correctly accepts strings with an even number of a's!</p>
+    </div>
+
+    <div class="note">
+        <h3>Key Observations:</h3>
+        <ul>
+            <li>The table starts with S = {ε} and E = {ε, a}</li>
+            <li>We fill the table using membership queries (is the string in the language?)</li>
+            <li>The algorithm detected the table wasn't closed (row(a) wasn't in S)</li>
+            <li>After adding 'aa', we got a consistent and closed table</li>
+            <li>The resulting DFA has 2 states and correctly recognizes strings with even number of a's</li>
+        </ul>
+    </div>
 </body>
 </html>
