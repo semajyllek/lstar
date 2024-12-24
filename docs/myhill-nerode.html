@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .theorem, .proof, .definition, .example, .corollary {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .theorem {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        
+        .proof {
+            background-color: #fff;
+            border-left: 4px solid #28a745;
+        }
+        
+        .definition {
+            background-color: #f8f9fa;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .example {
+            background-color: #f8f9fa;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .corollary {
+            background-color: #f8f9fa;
+            border-left: 4px solid #6f42c1;
+        }
+        
+        .qed {
+            float: right;
+            margin-top: 10px;
+        }
+        
+        .math {
+            font-family: "Computer Modern", serif;
+            font-style: italic;
+        }
+        
+        .section {
+            margin: 30px 0;
+        }
+        
+        table {
+            border-collapse: collapse;
+            margin: 20px 0;
+            width: 100%;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <h1>The Myhill-Nerode Theorem</h1>
+    
+    <div class="section">
+        <div class="definition">
+            <h3>Definition: Right Congruence</h3>
+            <p>A right congruence on Σ* is an equivalence relation ≡ such that for all x, y ∈ Σ* and w ∈ Σ*:</p>
+            <p>x ≡ y implies xw ≡ yw</p>
+            <p>In other words, if two strings are equivalent, concatenating the same suffix to both preserves their equivalence.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="definition">
+            <h3>Definition: Myhill-Nerode Relation ≡<sub>L</sub></h3>
+            <p>For a language L over Σ*, define the relation ≡<sub>L</sub> on Σ* as follows:</p>
+            <p>x ≡<sub>L</sub> y if and only if for all w ∈ Σ*:</p>
+            <p>xw ∈ L ⟺ yw ∈ L</p>
+            <p>Two strings are equivalent if they have the same future behavior with respect to L.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="theorem">
+            <h3>Myhill-Nerode Theorem</h3>
+            <p>The following statements are equivalent for a language L ⊆ Σ*:</p>
+            <ol>
+                <li>L is regular</li>
+                <li>≡<sub>L</sub> has finite index (finite number of equivalence classes)</li>
+                <li>L is the union of some equivalence classes of a right congruence of finite index</li>
+            </ol>
+            <p>Moreover, if L is regular, the number of states in the minimal DFA for L equals the index of ≡<sub>L</sub>.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="proof">
+            <h3>Proof</h3>
+            <p>We'll prove (1) ⟹ (2) ⟹ (3) ⟹ (1)</p>
+            
+            <h4>(1) ⟹ (2)</h4>
+            <p>Let M be a DFA accepting L with n states. For any x ∈ Σ*, let δ*(q₀, x) be the state reached after reading x.</p>
+            <p>Claim: If δ*(q₀, x) = δ*(q₀, y), then x ≡<sub>L</sub> y</p>
+            <ul>
+                <li>For any w, δ*(q₀, xw) = δ*(δ*(q₀, x), w) = δ*(δ*(q₀, y), w) = δ*(q₀, yw)</li>
+                <li>Therefore, xw ∈ L ⟺ yw ∈ L</li>
+                <li>Thus x ≡<sub>L</sub> y</li>
+            </ul>
+            <p>Since M has n states, there are at most n equivalence classes.</p>
+
+            <h4>(2) ⟹ (3)</h4>
+            <p>≡<sub>L</sub> is itself a right congruence of finite index:</p>
+            <ul>
+                <li>It's an equivalence relation by definition</li>
+                <li>If x ≡<sub>L</sub> y, then for any v, w: xvw ∈ L ⟺ yvw ∈ L</li>
+                <li>Therefore, xv ≡<sub>L</sub> yv (right congruence)</li>
+                <li>L is the union of its own equivalence classes</li>
+            </ul>
+
+            <h4>(3) ⟹ (1)</h4>
+            <p>Let ≡ be a right congruence of finite index n such that L is a union of its classes. We construct a DFA M:</p>
+            <ul>
+                <li>States: equivalence classes of ≡</li>
+                <li>Initial state: [ε] (equivalence class of empty string)</li>
+                <li>Transitions: [x] ⟶<sup>a</sup> [xa]</li>
+                <li>Accept states: classes contained in L</li>
+            </ul>
+            <p>This DFA accepts L, proving L is regular.</p>
+            
+            <div class="qed">□</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="example">
+            <h3>Example: L = {w ∈ {a,b}* | w contains an even number of a's}</h3>
+            <p>The equivalence classes of ≡<sub>L</sub> are:</p>
+            <ul>
+                <li>[ε] = {w | w has even number of a's}</li>
+                <li>[a] = {w | w has odd number of a's}</li>
+            </ul>
+            <p>This gives us the minimal 2-state DFA for L.</p>
+            <table>
+                <tr>
+                    <th>State</th>
+                    <th>a</th>
+                    <th>b</th>
+                </tr>
+                <tr>
+                    <td>[ε] (accept)</td>
+                    <td>[a]</td>
+                    <td>[ε]</td>
+                </tr>
+                <tr>
+                    <td>[a]</td>
+                    <td>[ε]</td>
+                    <td>[a]</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="corollary">
+            <h3>Important Corollaries</h3>
+            <ol>
+                <li>The minimal DFA for a regular language L is unique up to isomorphism</li>
+                <li>A regular language with n equivalence classes cannot be accepted by a DFA with fewer than n states</li>
+                <li>To prove a language is not regular, it suffices to show ≡<sub>L</sub> has infinite index</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="example">
+            <h3>Non-Regular Example: L = {a<sup>n</sup>b<sup>n</sup> | n ≥ 0}</h3>
+            <p>For m ≠ n, a<sup>m</sup> ≢<sub>L</sub> a<sup>n</sup> because:</p>
+            <ul>
+                <li>Let w = b<sup>m</sup></li>
+                <li>a<sup>m</sup>b<sup>m</sup> ∈ L</li>
+                <li>a<sup>n</sup>b<sup>m</sup> ∉ L</li>
+            </ul>
+            <p>Therefore, ≡<sub>L</sub> has infinitely many equivalence classes, so L is not regular.</p>
+        </div>
+    </div>
+</body>
+</html>
