@@ -22,14 +22,14 @@
         .observation-table th {
             background-color: #f5f5f5;
         }
+        .observation-table .highlight {
+            background-color: #fff3cd;
+        }
         .step {
             margin: 30px 0;
             padding: 15px;
             background-color: #f8f9fa;
             border-radius: 5px;
-        }
-        .highlight {
-            background-color: #fff3cd;
         }
         .automaton {
             margin: 20px 0;
@@ -42,33 +42,55 @@
             color: #666;
             font-style: italic;
         }
+        .counterexample {
+            background-color: #ffe6e6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #e6ffe6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
-    <h1>L* Algorithm Visualization Example</h1>
-    <p>Target Language: Strings over {a, b} containing an even number of a's</p>
+    <h1>L* Algorithm Visualization - Complex Example</h1>
+    <p>Target Language: Strings over {a, b} where every 'a' is followed by at least two b's</p>
+    <p>Examples in language: bb, abb, abbb, abbabb, babbbb</p>
+    <p>Examples not in language: a, ab, ba, aba, abba</p>
     
     <div class="step">
         <h3>Step 1: Initial Observation Table</h3>
-        <p>Starting with empty string (ε) in S, and single letter suffixes in E</p>
+        <p>Starting with empty string (ε) in S, and suffixes {ε, a, b, ab} in E</p>
         <table class="observation-table">
             <tr>
                 <th></th>
                 <th>ε</th>
                 <th>a</th>
+                <th>b</th>
+                <th>ab</th>
             </tr>
             <tr>
                 <th>S: ε</th>
+                <td>1</td>
+                <td>0</td>
                 <td>1</td>
                 <td>0</td>
             </tr>
             <tr>
                 <th>S·A: a</th>
                 <td>0</td>
-                <td>1</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
             </tr>
             <tr>
                 <th>S·A: b</th>
+                <td>1</td>
+                <td>0</td>
                 <td>1</td>
                 <td>0</td>
             </tr>
@@ -77,42 +99,48 @@
     </div>
 
     <div class="step">
-        <h3>Step 2: Observation Table After Adding 'aa'</h3>
-        <p>Table is not closed because row(a) is not in S. Adding 'aa' to S.</p>
+        <h3>Step 2: Add 'a' to S (Table wasn't closed)</h3>
         <table class="observation-table">
             <tr>
                 <th></th>
                 <th>ε</th>
                 <th>a</th>
+                <th>b</th>
+                <th>ab</th>
             </tr>
             <tr>
                 <th>S: ε</th>
                 <td>1</td>
                 <td>0</td>
-            </tr>
-            <tr>
-                <th>S: aa</th>
                 <td>1</td>
                 <td>0</td>
             </tr>
             <tr>
-                <th>S·A: a</th>
+                <th>S: a</th>
                 <td>0</td>
-                <td>1</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
             </tr>
             <tr>
                 <th>S·A: b</th>
                 <td>1</td>
                 <td>0</td>
-            </tr>
-            <tr>
-                <th>S·A: aaa</th>
+                <td>1</td>
                 <td>0</td>
-                <td>1</td>
             </tr>
             <tr>
-                <th>S·A: aab</th>
-                <td>1</td>
+                <th>S·A: ab</th>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>S·A: aa</th>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
             </tr>
         </table>
@@ -130,21 +158,120 @@
             <ul>
                 <li>q0 --a--> q1</li>
                 <li>q0 --b--> q0</li>
-                <li>q1 --a--> q0</li>
+                <li>q1 --a--> q1</li>
                 <li>q1 --b--> q1</li>
             </ul>
         </div>
-        <p>This DFA correctly accepts strings with an even number of a's!</p>
+        <div class="counterexample">
+            <p>Teacher provides counterexample: "abb" (should be accepted)</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>Step 4: Add "abb" and its prefixes</h3>
+        <table class="observation-table">
+            <tr>
+                <th></th>
+                <th>ε</th>
+                <th>a</th>
+                <th>b</th>
+                <th>ab</th>
+                <th>bb</th>
+            </tr>
+            <tr>
+                <th>S: ε</th>
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th>S: a</th>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>S: ab</th>
+                <td>0</td>
+                <td>0</td>
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th>S: abb</th>
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+            </tr>
+            <tr class="highlight">
+                <th>S·A: b</th>
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+            </tr>
+            <tr class="highlight">
+                <th>S·A: aba</th>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>S·A: abba</th>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="step">
+        <h3>Step 5: Final DFA</h3>
+        <div class="automaton">
+            <p>States:</p>
+            <ul>
+                <li>q0 = [row(ε)] - Initial and accepting state</li>
+                <li>q1 = [row(a)] - Non-accepting state (waiting for two b's)</li>
+                <li>q2 = [row(ab)] - Non-accepting state (waiting for one more b)</li>
+                <li>q3 = [row(abb)] - Accepting state (requirement satisfied)</li>
+            </ul>
+            <p>Transitions:</p>
+            <ul>
+                <li>q0 --a--> q1</li>
+                <li>q0 --b--> q0</li>
+                <li>q1 --a--> q1</li>
+                <li>q1 --b--> q2</li>
+                <li>q2 --a--> q1</li>
+                <li>q2 --b--> q3</li>
+                <li>q3 --a--> q1</li>
+                <li>q3 --b--> q0</li>
+            </ul>
+        </div>
+        <div class="success">
+            <p>This DFA correctly accepts all strings where every 'a' is followed by at least two b's!</p>
+        </div>
     </div>
 
     <div class="note">
-        <h3>Key Observations:</h3>
+        <h3>Key Points in This Complex Example:</h3>
         <ul>
-            <li>The table starts with S = {ε} and E = {ε, a}</li>
-            <li>We fill the table using membership queries (is the string in the language?)</li>
-            <li>The algorithm detected the table wasn't closed (row(a) wasn't in S)</li>
-            <li>After adding 'aa', we got a consistent and closed table</li>
-            <li>The resulting DFA has 2 states and correctly recognizes strings with even number of a's</li>
+            <li>The initial conjecture was too simple and rejected valid strings like "abb"</li>
+            <li>Adding the counterexample and its prefixes revealed the need for more states</li>
+            <li>The final DFA has 4 states, tracking the progress of seeing 'a' and counting the following 'b's</li>
+            <li>The learning process required handling a counterexample to discover the correct structure</li>
+            <li>The observation table needed an additional suffix (bb) to distinguish states properly</li>
         </ul>
     </div>
 </body>
