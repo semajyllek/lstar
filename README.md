@@ -14,15 +14,10 @@ The L* algorithm, developed by Dana Angluin, is a method for learning a regular 
 3. Constructing a hypothesis DFA
 4. Using counterexamples to refine the hypothesis
 
-The visualization shows this process step by step, demonstrating how the algorithm:
-- Constructs and updates the observation table
-- Builds and refines the DFA
-- Handles various example languages like "strings with an even number of a's"
-
 ## Repository Structure
-- `src/`: Source code for L* algorithm implementation
-- `docs/`: Contains the web visualization
-- `tests/`: Test suite showing algorithm correctness
+- `src/`: source code for L* algorithm implementation
+- `docs/`: contains some theoretical documentation
+- `tests/`: test suite showing algorithm correctness
 
 ## Running Locally
 ```bash
