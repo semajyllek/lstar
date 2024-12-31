@@ -201,3 +201,32 @@ def test_invalid_examples(learner, even_as_oracle):
     with pytest.raises(ValueError):
         learner.initialize({'a', 'b'}, {'positive': set(), 'negative': set()}, even_as_oracle)
 
+
+
+if __name__ == "__main__":
+    oracle = EvenAsOracle()
+    alphabet = {'a', 'b'}
+    examples = {
+        'positive': {'', 'a a', 'a b b a'},
+        'negative': {'a', 'a a a'}
+    }
+
+    learner = LStarLearner()
+    learner.initialize(alphabet, examples, oracle)
+    dfa = learner.learn()
+    learner.print_observation_table()
+
+    # print("Learned DFA:")
+    # print(dfa)
+    # print("Testing learned DFA:")
+    # for test in ['a', 'a a', 'a a a', 'a a a a', 'b', 'a b', 'a b a', 'a b a a']:
+    #     print(f"  {test}: {run_dfa(dfa, test)}")
+    # print("Equivalence query result:")
+
+    # counterexample = oracle.equivalence_query(dfa)
+    # if counterexample is not None:
+    #     print(f"  Failed on: {counterexample}")
+    # else:
+    #     print("  No counterexample found")
+
+   

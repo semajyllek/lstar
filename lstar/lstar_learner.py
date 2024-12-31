@@ -1,6 +1,7 @@
 from typing import Optional, Tuple, Set, Dict
 import logging
 from .utils import run_dfa
+import numpy as np
 from collections import defaultdict
 
 logger = logging.getLogger(__name__)
@@ -9,6 +10,9 @@ logger = logging.getLogger(__name__)
 MAX_ITERATIONS = 5
 class LStarLearner:
     def __init__(self):
+        self._matrix = None
+        self._s_to_idx = {}
+        self._e_to_idx = {}
         self.S: Set[str] = set()
         self.E: Set[str] = set()
         self.T: Dict[Tuple[str, str], bool] = {}
@@ -39,57 +43,6 @@ class LStarLearner:
         self.print_observation_table()
 
 
-    def print_observation_table(self):
-        """Log observation table in a formatted way."""
-        # Get all prefixes and experiments
-        s_rows = sorted(self.S)
-        sa_rows = self._get_sa_rows()
-        sorted_experiments = sorted(self.E)
-        
-        # Calculate column widths
-        prefix_width = max(
-            max((len(s) for s in s_rows + sa_rows), default=2),
-            len("Prefix")
-        )
-        col_widths = {}
-        for e in sorted_experiments:
-            e_display = e if e else "ε"
-            col_widths[e] = max(len(e_display), 5)
-        
-        # Build table as string
-        table = []
-        
-        # Header
-        header = f"{'Prefix':<{prefix_width}}│"
-        header += "│".join(f"{e if e else 'ε':^{col_widths[e]}}" for e in sorted_experiments)
-        table.append("┌" + "─" * prefix_width + "┬" + "┬".join("─" * width for width in col_widths.values()) + "┐")
-        table.append(header)
-        table.append("├" + "─" * prefix_width + "┼" + "┼".join("─" * width for width in col_widths.values()) + "┤")
-        
-        # S rows
-        for s in s_rows:
-            row = f"{s if s else 'ε':<{prefix_width}}│"
-            row_sig = self._get_row_signature(s)
-            row += "│".join(f"{str(row_sig[i]):^{col_widths[e]}}" for i, e in enumerate(sorted_experiments))
-            table.append(row)
-            
-        # Separator before S·Σ rows
-        if sa_rows:
-            table.append("├" + "─" * prefix_width + "┼" + "┼".join("─" * width for width in col_widths.values()) + "┤")
-            
-        # S·Σ rows
-        for sa in sa_rows:
-            row = f"{sa:<{prefix_width}}│"
-            row_sig = self._get_row_signature(sa)
-            row += "│".join(f"{str(row_sig[i]):^{col_widths[e]}}" for i, e in enumerate(sorted_experiments))
-            table.append(row)
-            
-        # Bottom border
-        table.append("└" + "─" * prefix_width + "┴" + "┴".join("─" * width for width in col_widths.values()) + "┘")
-        
-        # Log the entire table
-        logger.debug("\nObservation Table:\n" + "\n".join(table))
-
     def _construct_dfa(self) -> dict:
         """Construct DFA from observation table."""
         # Get unique states from row signatures
@@ -118,19 +71,19 @@ class LStarLearner:
     
 
     def _is_consistent(self) -> tuple:
-        """Check if table is consistent."""
-        # Group rows by their signatures
-        sig_to_strings = defaultdict(list)
+        """Check consistency using vectorized operations, checking both S and S·Σ rows."""
+        # First collect all unique row signatures in S
+        signatures_to_strings = defaultdict(list)
         for s in self.S:
-            sig = self._get_row_signature(s)
-            sig_to_strings[sig].append(s)
+            sig = self._get_row_signature(s)  # Use existing method which includes S·Σ info
+            signatures_to_strings[sig].append(s)
 
         # Check each group with same signature
-        for strings_with_same_sig in sig_to_strings.values():
+        for strings_with_same_sig in signatures_to_strings.values():
             if len(strings_with_same_sig) < 2:
                 continue
 
-            # Check consistency for each alphabet symbol
+            # For same signatures, check their S·Σ extensions using matrix
             for a in sorted(self.alphabet):
                 extended_sigs = {}
                 for s in strings_with_same_sig:
@@ -139,14 +92,14 @@ class LStarLearner:
                     
                     if sa_sig in extended_sigs:
                         s_prev = extended_sigs[sa_sig]
+                        # Found potential inconsistency, verify with different suffix
                         for e in sorted(self.E):
                             if self.T[(sa, e)] != self.T[f"{s_prev} {a}".strip(), e]:
                                 return s_prev, s, a, e
                     else:
                         extended_sigs[sa_sig] = s
-                        
+
         return None
-    
 
     def _get_row_signature(self, s: str) -> tuple:
         """Get signature for a row, using cache."""
@@ -189,24 +142,40 @@ class LStarLearner:
 
 
     def _update_observation_table(self):
-        """Update the observation table and clear signature cache."""
+        """Update observation table using numpy array for efficient operations"""
         self._signature_cache.clear()
         self.T = {}
         
-        # Fill table for S
+        # Create mappings
+        self._s_to_idx = {s: i for i, s in enumerate(sorted(self.S))}
+        self._e_to_idx = {e: i for i, e in enumerate(sorted(self.E))}
+        
+        # Initialize matrix
+        total_rows = len(self.S) + len(self.S) * len(self.alphabet)
+        self._matrix = np.zeros((total_rows, len(self.E)), dtype=bool)
+        
+        # Fill matrix for S rows
         for s in self.S:
+            s_idx = self._s_to_idx[s]
             for e in self.E:
+                e_idx = self._e_to_idx[e]
                 seq = f"{s} {e}".strip()
-                self.T[(s, e)] = self.teacher.membership_query(seq)
+                result = self.teacher.membership_query(seq)
+                self._matrix[s_idx, e_idx] = result
+                self.T[(s, e)] = result  # Keep original T dict for compatibility
                 
-        # Fill table for S·Σ
+        # Fill matrix for S·Σ rows
+        sa_idx = len(self.S)
         for s in self.S:
             for a in self.alphabet:
                 sa = f"{s} {a}".strip()
                 for e in self.E:
+                    e_idx = self._e_to_idx[e]
                     seq = f"{sa} {e}".strip()
-                    self.T[(sa, e)] = self.teacher.membership_query(seq)
-
+                    result = self.teacher.membership_query(seq)
+                    self._matrix[sa_idx, e_idx] = result
+                    self.T[(sa, e)] = result  # Keep original T dict for compatibility
+                sa_idx += 1
 
     def _check_table_properties(self) -> Optional[str]:
         """
@@ -334,3 +303,84 @@ class LStarLearner:
         self.negative_examples = set(examples['negative'])
         self._signature_cache = {}
         self._update_observation_table()
+
+    
+    def print_observation_table(self):
+        """Log observation table with perfect box alignment and right padding."""
+        # Get all prefixes and experiments
+        s_rows = sorted(self.S)
+        sa_rows = self._get_sa_rows()
+        sorted_experiments = sorted(self.E)
+        
+        # Calculate column widths with padding
+        prefix_width = max(
+            max((len(s) for s in s_rows + sa_rows), default=2),
+            len("Prefix")
+        ) + 1  # Add 1 for right padding
+        
+        col_widths = {}
+        for e in sorted_experiments:
+            e_display = e if e else "ε"
+            col_widths[e] = max(len(str(e_display)), len("False"), 5) + 1  # Add 1 for right padding
+
+        # Build table
+        lines = []
+        
+        # Top border
+        border = "┌" + "─" * prefix_width
+        for e in sorted_experiments:
+            border += "┬" + "─" * col_widths[e]
+        border += "┐"
+        lines.append(border)
+        
+        # Header
+        header = "│" + "Prefix".ljust(prefix_width)
+        for e in sorted_experiments:
+            e_display = e if e else "ε"
+            header += "│" + e_display.ljust(col_widths[e])
+        header += "│"
+        lines.append(header)
+        
+        # Separator after header
+        separator = "├" + "─" * prefix_width
+        for e in sorted_experiments:
+            separator += "┼" + "─" * col_widths[e]
+        separator += "┤"
+        lines.append(separator)
+        
+        # S rows
+        for s in s_rows:
+            row = "│" + (s if s else "ε").ljust(prefix_width)
+            for e in sorted_experiments:
+                value = str(self.T.get((s, e), "?"))
+                row += "│" + value.ljust(col_widths[e])
+            row += "│"
+            lines.append(row)
+            
+        # Separator before S·Σ rows
+        if sa_rows:
+            lines.append(separator)
+            
+        # S·Σ rows
+        for sa in sa_rows:
+            row = "│" + sa.ljust(prefix_width)
+            for e in sorted_experiments:
+                value = str(self.T.get((sa, e), "?"))
+                row += "│" + value.ljust(col_widths[e])
+            row += "│"
+            lines.append(row)
+            
+        # Bottom border
+        bottom = "└" + "─" * prefix_width
+        for e in sorted_experiments:
+            bottom += "┴" + "─" * col_widths[e]
+        bottom += "┘"
+        lines.append(bottom)
+        
+        print("\nObservation Table:")
+        print("\n".join(lines))
+
+        if self._matrix is not None:
+            print("\nMatrix shape:", self._matrix.shape)
+            print("S size:", len(self.S))
+            print("E size:", len(self.E))
