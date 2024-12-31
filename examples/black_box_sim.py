@@ -1,6 +1,6 @@
-from .oracle import Oracle
-from .lstar_learner import LStarLearner
-from .utils import run_dfa
+from lstar.oracle import Oracle
+from lstar.lstar_learner import LStarLearner
+from lstar.utils import run_dfa
 import random
 
 class ProtocolOracle(Oracle):

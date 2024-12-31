@@ -1,7 +1,7 @@
 import pytest
-from src.black_box_sim import ProtocolOracle
-from src.lstar_learner import LStarLearner
-from src.utils import run_dfa
+from examples.black_box_sim import ProtocolOracle
+from lstar.lstar_learner import LStarLearner
+from lstar.utils import run_dfa
 
 
 # oracle tests

@@ -1,8 +1,9 @@
 import pytest
-from src.utils import run_dfa
+from lstar.utils import run_dfa
 from itertools import product
-from src.oracle import Oracle
-from src.lstar_learner import LStarLearner
+from lstar.oracle import Oracle
+from lstar.lstar_learner import LStarLearner
+
 
 
 
